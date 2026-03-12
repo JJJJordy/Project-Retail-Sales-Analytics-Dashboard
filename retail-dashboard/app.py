@@ -28,7 +28,9 @@ build_database()
 # ---- LOAD DATA ----
 @st.cache_data
 def load_data():
-    conn = sqlite3.connect('superstore.db')
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, 'superstore.db')
+    conn = sqlite3.connect(db_path)
 
     orders = pd.read_sql_query("SELECT * FROM orders", conn)
     
