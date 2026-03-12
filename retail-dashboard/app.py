@@ -25,7 +25,7 @@ def load_data():
             COUNT(DISTINCT "Order ID") AS total_orders,
             ROUND(SUM(Sales), 2) AS total_sales,
             ROUND(SUM(Profit), 2) AS total_profit,
-                                      ROUND(AVG("Profit Margin %), 2) AS avg_margin
+            ROUND(AVG("Profit Margin %"), 2) AS avg_margin
         FROM orders
         GROUP BY "Order Year"
         ORDER BY "Order Year"
@@ -36,7 +36,7 @@ def load_data():
             Category,
             ROUND(SUM(Sales), 2) AS total_sales,
             ROUND(SUM(Profit), 2) AS total_profit,
-            ROUND(AVG("Profit Margin %), 2) AS avg_margin,
+            ROUND(AVG("Profit Margin %"), 2) AS avg_margin,
             COUNT(*) AS total_orders
         FROM orders
         GROUP BY Category
@@ -194,7 +194,7 @@ with col2:
     fig2 = px.pie(
         filtered_category,
         values="total_sales",
-        names="category",
+        names="Category",
         hole=0.4,
         color_discrete_sequence=px.colors.qualitative.Set2
     )
@@ -202,3 +202,117 @@ with col2:
     st.plotly_chart(fig2, use_container_width=True)
 
 # --- ROW 2: MONTHLY TREND ---
+st.subheader("Monthly Sales Trend")
+
+filtered_monthly = filtered_df.groupby(["Order Year", "Order Month", "Order Month Name"]).agg(
+    total_sales=("Sales", "sum"),
+    total_profit=("Profit", "sum")
+).reset_index().sort_values(["Order Year", "Order Month"])
+
+filtered_monthly["Year-Month"] = (
+    filtered_monthly["Order Year"].astype(str) + "-" +
+    filtered_monthly["Order Month"].astype(str).str.zfill(2)
+)
+
+fig3 = px.line(
+    filtered_monthly,
+    x="Year-Month",
+    y="total_sales",
+    color="Order Year",
+    markers=True,
+    color_discrete_sequence=px.colors.qualitative.Set1
+)
+
+fig3.update_layout(plot_bgcolor="rgba(0,0,0,0)", xaxis_tickangle=-45)
+st.plotly_chart(fig3, use_container_width=True)
+
+st.markdown("---")
+
+# --- ROW 3: REGION + SEGMENT ---
+col3, col4 = st.columns(2)
+
+with col3:
+    st.subheader("Profit by Region")
+    filtered_region = filtered_df.groupby("Region").agg(
+        total_sales=("Sales", "sum"),
+        total_profit=("Profit", "sum")
+    ).reset_index()
+
+    fig4 = px.bar(
+        filtered_region,
+        x="Region",
+        y="total_profit",
+        color="total_profit",
+        color_continuous_scale=["#FF6B6B", "#FFE66D", "#4ECDC4"],
+        text_auto=".2s"
+    )
+    fig4.update_layout(plot_bgcolor="rgba(0,0,0,0)")
+    st.plotly_chart(fig4, use_container_width=True)
+
+with col4:
+    st.subheader("Sales by Customer Segment")
+    filtered_segment = filtered_df.groupby("Segment").agg(
+        total_sales=("Sales", "sum"),
+        total_profit=("Profit", "sum"),
+        unique_customers=("Customer ID", "nunique"),
+        avg_order_value=("Sales", "mean")
+    ).reset_index()
+
+    fig5 = px.bar(
+        filtered_segment,
+        x="Segment",
+        y="total_sales",
+        color="Segment",
+        text_auto=".2s",
+        color_discrete_sequence=px.colors.qualitative.Pastel
+    )
+    fig5.update_layout(plot_bgcolor=("rgba(0,0,0,0)"))
+    st.plotly_chart(fig5, use_container_width=True)
+
+st.markdown("---")
+
+# --- ROW 4: TOP & WORST PRODUCTS ---
+col5, col6 = st.columns(2)
+
+with col5:
+    st.subheader("Top 10 Most Profitable Products")
+    filtered_top = filtered_df.groupby(["Product Name", "Category"]).agg(
+        total_profit=("Profit", "sum")
+    ).reset_index().nlargest(10, "total_profit")
+
+    fig6 = px.bar(
+        filtered_top,
+        x="total_profit",
+        y="Product Name",
+        color="Category",
+        orientation="h",
+        color_discrete_sequence=px.colors.qualitative.Set2
+    )
+    fig6.update_layout(plot_bgcolor="rgba(0,0,0,0)", yaxis={"categoryorder" : "total ascending"})
+    st.plotly_chart(fig6, use_container_width=True)
+
+with col6:
+    st.subheader("Top 10 Loss-Making Products")
+    filtered_loss = filtered_df.groupby(["Product Name", "Category"]).agg(
+        total_profit=("Profit", "sum")
+    ).reset_index().nsmallest(10, "total_profit")
+
+    fig7 = px.bar(
+        filtered_loss,
+        x="total_profit",
+        y="Product Name",
+        color="Category",
+        orientation="h",
+        color_discrete_sequence=px.colors.qualitative.Set1
+    )
+    fig7.update_layout(plot_bgcolor="rgba(0,0,0,0)", yaxis={"categoryorder": "total descending"})
+    st.plotly_chart(fig7, use_conttainer_width=True)
+
+st.markdown("---")
+
+# --- RAW DATA TABLE ---
+with st.expander("View Raw Data"):
+    st.dataframe(filtered_df.reset_index(drop=True), use_container_width=True)
+
+st.caption("Built with Python, SQLite & Streamlit | Superstore Sales Dataset")
+
