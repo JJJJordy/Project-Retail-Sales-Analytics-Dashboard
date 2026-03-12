@@ -3,6 +3,7 @@ import sqlite3
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
+import os
 
 # --- PAGE CONFIG ---
 st.set_page_config(
@@ -14,8 +15,11 @@ st.set_page_config(
 
 # ---- BUILD DATABASE IF IT DOESN'T EXIST ----
 def build_database():
-    conn = sqlite3.connect('superstore.db')
-    df = pd.read_csv('Superstore_clean.csv')
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(base_dir, 'superstore_clean.csv')
+    db_path = os.path.join(base_dir, 'superstore.db')
+    conn = sqlite3.connect(db_path)
+    df = pd.read_csv(csv_path)
     df.to_sql('orders', conn, if_exists='replace', index=False)
     conn.close()
 
