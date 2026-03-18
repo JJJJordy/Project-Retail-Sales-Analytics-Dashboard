@@ -5,7 +5,7 @@ analyzing 4 years of retail sales data (2014–2017) across 9,994 orders.
 
 ## 🔗 Live Demo
 
-[Click here to view the dashboard][ldivpcd42jh2svfvg6mdum.streamlit.app](https://w7kqkmx3epxmzehonav4r6.streamlit.app/)
+[Click here to view the dashboard] - [ldivpcd42jh2svfvg6mdum.streamlit.app](https://w7kqkmx3epxmzehonav4r6.streamlit.app/)
 
 ## 📊 Key Business Insights
 
@@ -31,7 +31,7 @@ analyzing 4 years of retail sales data (2014–2017) across 9,994 orders.
 
 ## 🗂️ Dataset
 
-[Superstore Sales Dataset](https://www.kaggle.com/datasets/vivek468/superstore-dataset-final) via Kaggle
+[Superstore Sales Dataset] - (https://www.kaggle.com/datasets/vivek468/superstore-dataset-final) via Kaggle
 
 ## 🚀 Run Locally
 
